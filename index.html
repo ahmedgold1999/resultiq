@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نتائج الامتحانات - وزارة التربية العراقية</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-circle">
+                        <span class="logo-text">وزارة التربية</span>
+                    </div>
+                </div>
+                <h1>نتائج الامتحانات</h1>
+                <p class="subtitle">نتائج الدراسة المتوسطة للعام الدراسي 2025/2024 الدور الأول</p>
+                <p class="description">يرجى إدخال الرقم الامتحاني بشكل صحيح للحصول على النتائج</p>
+            </div>
+
+            <form id="examForm" class="form">
+                <div class="input-group">
+                    <label for="examNumber">الرقم الامتحاني</label>
+                    <input type="text" id="examNumber" name="examNumber" placeholder="ادخل الرقم الامتحاني" required>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">البحث عن النتائج</span>
+                    <div class="loading-spinner" style="display: none;"></div>
+                </button>
+            </form>
+
+            <div id="results" class="results" style="display: none;">
+                <div class="student-info">
+                    <h2 id="studentName"></h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">المحافظة:</span>
+                            <span id="governorate"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">المدرسة:</span>
+                            <span id="school"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">الجنس:</span>
+                            <span id="gender"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">النتيجة:</span>
+                            <span id="status" class="status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grades-section">
+                    <h3>الدرجات</h3>
+                    <div id="gradesTable" class="grades-table"></div>
+                    
+                    <div class="summary">
+                        <div class="summary-item">
+                            <span class="label">المجموع الكلي:</span>
+                            <span id="totalGrade" class="total"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">المعدل:</span>
+                            <span id="percentage" class="percentage"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error" style="display: none;">
+                <p id="errorMessage"></p>
+            </div>
+
+            <div class="footer">
+                <p>جميع الحقوق محفوظة © 2025 وزارة التربية العراقية</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
