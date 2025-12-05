@@ -389,6 +389,15 @@
                 gap: 8px;
             }
         }
+        
+        /* تخصيص القائمة المنسدلة */
+        .option-personal {
+            color: #3498db;
+        }
+        
+        .option-abu-hatem {
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -417,20 +426,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="comboBox"><i class="fas fa-list"></i> رقم أبو حاتم</label>
+                        <label for="comboBox"><i class="fas fa-list"></i> نوع الحجز</label>
                         <div class="combo-box">
                             <select id="comboBox" class="form-control" required>
-                                <option value="" disabled selected>اختر رقم أبو حاتم</option>
-                                <option value="رقم 1 - الحساب الأساسي">رقم 1 - الحساب الأساسي</option>
-                                <option value="رقم 2 - حساب المبيعات">رقم 2 - حساب المبيعات</option>
-                                <option value="رقم 3 - حساب المشتريات">رقم 3 - حساب المشتريات</option>
-                                <option value="رقم 4 - حساب المصروفات">رقم 4 - حساب المصروفات</option>
-                                <option value="رقم 5 - حساب الإيرادات">رقم 5 - حساب الإيرادات</option>
-                                <option value="رقم 6 - حساب المخزون">رقم 6 - حساب المخزون</option>
-                                <option value="رقم 7 - حساب الأصول">رقم 7 - حساب الأصول</option>
-                                <option value="رقم 8 - حساب الخصوم">رقم 8 - حساب الخصوم</option>
-                                <option value="رقم 9 - حساب رأس المال">رقم 9 - حساب رأس المال</option>
-                                <option value="رقم 10 - حساب الاحتياطيات">رقم 10 - حساب الاحتياطيات</option>
+                                <option value="" disabled selected>اختر نوع الحجز</option>
+                                <option value="رقمي الشخصي" class="option-personal">رقمي الشخصي</option>
+                                <option value="رقم أبو حاتم" class="option-abu-hatem">رقم أبو حاتم</option>
                             </select>
                         </div>
                     </div>
@@ -481,26 +482,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateStats();
             renderReservations();
-            
-            // إضافة بعض الحجوزات الافتراضية للعرض
-            if (reservations.length === 0) {
-                addSampleReservations();
-            }
         });
-        
-        // إضافة حجوزات افتراضية للعرض
-        function addSampleReservations() {
-            const sampleReservations = [
-                {id: 1, ribbonName: "ربون الملكية", peopleCount: 5, comboOption: "رقم 1 - الحساب الأساسي"},
-                {id: 2, ribbonName: "ربون الإدارة", peopleCount: 3, comboOption: "رقم 3 - حساب المشتريات"},
-                {id: 3, ribbonName: "ربون المبيعات", peopleCount: 8, comboOption: "رقم 2 - حساب المبيعات"}
-            ];
-            
-            reservations.push(...sampleReservations);
-            saveToLocalStorage();
-            renderReservations();
-            updateStats();
-        }
         
         // معالجة إرسال النموذج
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
@@ -510,8 +492,21 @@
             const peopleCount = parseInt(document.getElementById('peopleCount').value);
             const comboOption = document.getElementById('comboBox').value;
             
-            if (!ribbonName || !comboOption) {
-                showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
+            if (!ribbonName) {
+                showAlert('يرجى إدخال اسم الربون', 'error');
+                document.getElementById('ribbonName').focus();
+                return;
+            }
+            
+            if (isNaN(peopleCount) || peopleCount < 1 || peopleCount > 100) {
+                showAlert('يرجى إدخال عدد أفراد صحيح بين 1 و 100', 'error');
+                document.getElementById('peopleCount').focus();
+                return;
+            }
+            
+            if (!comboOption) {
+                showAlert('يرجى اختيار نوع الحجز', 'error');
+                document.getElementById('comboBox').focus();
                 return;
             }
             
@@ -538,7 +533,8 @@
                 ribbonName,
                 peopleCount,
                 comboOption,
-                date: new Date().toLocaleDateString('ar-SA')
+                date: new Date().toLocaleDateString('ar-SA'),
+                time: new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
             };
             
             reservations.push(newReservation);
@@ -556,6 +552,7 @@
                 reservations[index].ribbonName = ribbonName;
                 reservations[index].peopleCount = peopleCount;
                 reservations[index].comboOption = comboOption;
+                reservations[index].updatedAt = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 
                 saveToLocalStorage();
                 renderReservations();
@@ -613,19 +610,31 @@
                 return;
             }
             
+            // ترتيب الحجوزات من الأحدث إلى الأقدم
+            reservations.sort((a, b) => b.id - a.id);
+            
             reservationsList.innerHTML = '';
             
             reservations.forEach(reservation => {
                 const reservationElement = document.createElement('div');
                 reservationElement.className = 'reservation-item';
                 
+                // تحديد لون الحدود حسب نوع الحجز
+                const borderColor = reservation.comboOption === 'رقمي الشخصي' ? '#3498db' : '#e74c3c';
+                reservationElement.style.borderRightColor = borderColor;
+                
+                // إضافة أيقونة حسب نوع الحجز
+                const iconClass = reservation.comboOption === 'رقمي الشخصي' ? 'fas fa-user-circle' : 'fas fa-hashtag';
+                
                 reservationElement.innerHTML = `
                     <div class="reservation-info">
                         <h3>${reservation.ribbonName}</h3>
                         <div class="reservation-details">
                             <span><i class="fas fa-users"></i> ${reservation.peopleCount} أفراد</span>
-                            <span><i class="fas fa-hashtag"></i> ${reservation.comboOption}</span>
+                            <span><i class="${iconClass}"></i> ${reservation.comboOption}</span>
                             <span><i class="fas fa-calendar"></i> ${reservation.date}</span>
+                            <span><i class="fas fa-clock"></i> ${reservation.time}</span>
+                            ${reservation.updatedAt ? `<span><i class="fas fa-edit"></i> تم التعديل: ${reservation.updatedAt}</span>` : ''}
                         </div>
                     </div>
                     <div class="reservation-actions">
@@ -686,6 +695,86 @@
             document.querySelector('.reservation-card').style.animation = 'fadeIn 1s 0.2s both';
             document.querySelector('.reservations-container').style.animation = 'fadeIn 1s 0.4s both';
         }, 100);
+        
+        // تصدير الحجوزات إلى ملف JSON
+        function exportReservations() {
+            if (reservations.length === 0) {
+                showAlert('لا توجد حجوزات لتصديرها', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(reservations, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'حجوزات_الأسماء_المحجوزة_' + new Date().toLocaleDateString('ar-SA') + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showAlert('تم تصدير الحجوزات بنجاح', 'success');
+        }
+        
+        // استيراد الحجوزات من ملف JSON
+        function importReservations(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        reservations = importedData;
+                        saveToLocalStorage();
+                        renderReservations();
+                        updateStats();
+                        showAlert('تم استيراد الحجوزات بنجاح', 'success');
+                    } else {
+                        showAlert('صيغة الملف غير صحيحة', 'error');
+                    }
+                } catch (error) {
+                    showAlert('خطأ في قراءة الملف', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // إضافة أزرار التصدير والاستيراد إلى واجهة المستخدم
+        document.addEventListener('DOMContentLoaded', function() {
+            const reservationsHeader = document.querySelector('.reservations-header');
+            
+            const importExportDiv = document.createElement('div');
+            importExportDiv.className = 'reservation-actions';
+            importExportDiv.style.marginTop = '10px';
+            
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'action-btn edit-btn';
+            exportBtn.innerHTML = '<i class="fas fa-download"></i> تصدير';
+            exportBtn.onclick = exportReservations;
+            exportBtn.style.marginRight = '5px';
+            
+            const importBtn = document.createElement('button');
+            importBtn.className = 'action-btn edit-btn';
+            importBtn.innerHTML = '<i class="fas fa-upload"></i> استيراد';
+            
+            const importInput = document.createElement('input');
+            importInput.type = 'file';
+            importInput.accept = '.json';
+            importInput.style.display = 'none';
+            importInput.onchange = importReservations;
+            
+            importBtn.onclick = function() {
+                importInput.click();
+            };
+            
+            importExportDiv.appendChild(exportBtn);
+            importExportDiv.appendChild(importBtn);
+            importExportDiv.appendChild(importInput);
+            
+            reservationsHeader.appendChild(importExportDiv);
+        });
     </script>
 </body>
 </html>
