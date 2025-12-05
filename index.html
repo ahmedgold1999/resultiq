@@ -3,216 +3,689 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نتائج الامتحانات - وزارة التربية العراقية</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>نظام الأسماء المحجوزة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        header h1:after {
+            content: '';
+            position: absolute;
+            width: 60%;
+            height: 4px;
+            background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+            bottom: -10px;
+            left: 20%;
+            border-radius: 2px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 600px;
+            margin: 20px auto 0;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* بطاقة إدخال الحجز */
+        .reservation-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+        
+        .reservation-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .reservation-card h2 i {
+            color: var(--secondary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .combo-box {
+            position: relative;
+        }
+        
+        .combo-box select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 16px center;
+            padding-left: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(to right, var(--secondary-color), #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #2980b9, var(--secondary-color));
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* قائمة الحجوزات */
+        .reservations-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .reservations-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .reservations-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .reservations-header h2 i {
+            color: var(--accent-color);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: var(--light-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .reservations-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .reservation-item {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-right: 5px solid var(--secondary-color);
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reservation-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .reservation-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .reservation-details {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+            color: #666;
+        }
+        
+        .reservation-details span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .reservation-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+        
+        .edit-btn {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        /* تذييل الصفحة */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        
+        /* تأثيرات للقائمة */
+        .reservations-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .reservations-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .reservations-list::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 10px;
+        }
+        
+        /* رسائل التنبيه */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s;
+        }
+        
+        .alert-success {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-right: 5px solid var(--success-color);
+            color: var(--success-color);
+        }
+        
+        .alert-error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-right: 5px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .close-alert {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* تأثيرات للبطاقات */
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .main-content {
+                gap: 20px;
+            }
+            
+            .reservation-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .reservation-actions {
+                align-self: flex-end;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <!-- Header Section -->
-            <div class="header">
-                <div class="logo">
-                    <div class="logo-circle">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                </div>
-                <h1>نتائج الامتحانات</h1>
-                <p class="subtitle">نتائج الدراسة المتوسطة للعام الدراسي 2025/2024 الدور الأول</p>
-                <p class="description">يرجى إدخال الرقم الامتحاني بشكل صحيح للحصول على النتائج</p>
+        <header>
+            <h1><i class="fas fa-crown"></i> نظام الأسماء المحجوزة</h1>
+            <p>نظام متكامل لإدارة أسماء الربون المحجوزة وتنظيم عمليات الحجز بسهولة وكفاءة</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- بطاقة إدخال الحجز -->
+            <section class="reservation-card">
+                <h2><i class="fas fa-calendar-plus"></i> حجز جديد</h2>
                 
-                <!-- Social Media Icons -->
-                <div class="social-media">
-                    <a href="https://facebook.com" target="_blank" class="social-icon facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="https://twitter.com" target="_blank" class="social-icon twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="https://instagram.com" target="_blank" class="social-icon instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://youtube.com" target="_blank" class="social-icon youtube">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                    <button class="social-icon whatsapp" onclick="shareWhatsApp()">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                    <button class="social-icon telegram" onclick="shareTelegram()">
-                        <i class="fab fa-telegram-plane"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Search Form -->
-            <form id="examForm" class="form">
-                <div class="input-group">
-                    <label for="examNumber">
-                        <i class="fas fa-id-card"></i>
-                        الرقم الامتحاني
-                    </label>
-                    <input type="text" id="examNumber" name="examNumber" placeholder="ادخل الرقم الامتحاني" required>
-                </div>
-                <button type="submit" class="submit-btn">
-                    <span class="btn-text">
-                        <i class="fas fa-search"></i>
-                        البحث عن النتائج
-                    </span>
-                    <div class="loading-spinner" style="display: none;"></div>
-                </button>
-            </form>
-
-            <!-- Results Section -->
-            <div id="results" class="results" style="display: none;">
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button id="searchAgainBtn" class="action-btn search-again">
-                        <i class="fas fa-search"></i>
-                        بحث عن نتيجة أخرى
-                    </button>
-                    <button id="downloadPdfBtn" class="action-btn download-pdf">
-                        <i class="fas fa-file-pdf"></i>
-                        تحميل PDF
-                    </button>
-                    <button id="downloadImageBtn" class="action-btn download-image">
-                        <i class="fas fa-image"></i>
-                        تحميل صورة
-                    </button>
-                    <button id="printBtn" class="action-btn print">
-                        <i class="fas fa-print"></i>
-                        طباعة
-                    </button>
-                </div>
-
-                <!-- Student Information -->
-                <div class="student-info" id="studentInfoCard">
-                    <div class="student-header">
-                        <div class="student-avatar">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <h2 id="studentName"></h2>
-                        <div class="status-badge">
-                            <span id="status" class="status"></span>
+                <div id="alertMessage" class="alert" style="display: none;"></div>
+                
+                <form id="reservationForm">
+                    <div class="form-group">
+                        <label for="ribbonName"><i class="fas fa-user"></i> اسم الربون</label>
+                        <input type="text" id="ribbonName" class="form-control" placeholder="أدخل اسم الربون" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="peopleCount"><i class="fas fa-users"></i> عدد الأفراد</label>
+                        <input type="number" id="peopleCount" class="form-control" min="1" max="100" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comboBox"><i class="fas fa-list"></i> رقم أبو حاتم</label>
+                        <div class="combo-box">
+                            <select id="comboBox" class="form-control" required>
+                                <option value="" disabled selected>اختر رقم أبو حاتم</option>
+                                <option value="رقم 1 - الحساب الأساسي">رقم 1 - الحساب الأساسي</option>
+                                <option value="رقم 2 - حساب المبيعات">رقم 2 - حساب المبيعات</option>
+                                <option value="رقم 3 - حساب المشتريات">رقم 3 - حساب المشتريات</option>
+                                <option value="رقم 4 - حساب المصروفات">رقم 4 - حساب المصروفات</option>
+                                <option value="رقم 5 - حساب الإيرادات">رقم 5 - حساب الإيرادات</option>
+                                <option value="رقم 6 - حساب المخزون">رقم 6 - حساب المخزون</option>
+                                <option value="رقم 7 - حساب الأصول">رقم 7 - حساب الأصول</option>
+                                <option value="رقم 8 - حساب الخصوم">رقم 8 - حساب الخصوم</option>
+                                <option value="رقم 9 - حساب رأس المال">رقم 9 - حساب رأس المال</option>
+                                <option value="رقم 10 - حساب الاحتياطيات">رقم 10 - حساب الاحتياطيات</option>
+                            </select>
                         </div>
                     </div>
                     
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="label">المحافظة</span>
-                                <span id="governorate"></span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-school"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="label">المدرسة</span>
-                                <span id="school"></span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-venus-mars"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="label">الجنس</span>
-                                <span id="gender"></span>
-                            </div>
-                        </div>
+                    <button type="submit" class="btn pulse">
+                        <i class="fas fa-check-circle"></i> تأكيد الحجز
+                    </button>
+                </form>
+            </section>
+            
+            <!-- قائمة الحجوزات -->
+            <section class="reservations-container">
+                <div class="reservations-header">
+                    <h2><i class="fas fa-list-alt"></i> الحجوزات المسجلة</h2>
+                    <div class="stats">
+                        <div class="stat-item" id="totalReservations">الإجمالي: 0</div>
+                        <div class="stat-item" id="totalPeople">الأفراد: 0</div>
                     </div>
                 </div>
-
-                <!-- Grades Section -->
-                <div class="grades-section">
-                    <div class="section-header">
-                        <h3>
-                            <i class="fas fa-chart-bar"></i>
-                            الدرجات
-                        </h3>
-                    </div>
-                    <div id="gradesTable" class="grades-table"></div>
-                    
-                    <div class="summary">
-                        <div class="summary-item total-grade">
-                            <div class="summary-icon">
-                                <i class="fas fa-calculator"></i>
-                            </div>
-                            <div class="summary-content">
-                                <span class="label">المجموع الكلي</span>
-                                <span id="totalGrade" class="value"></span>
-                            </div>
-                        </div>
-                        <div class="summary-item percentage">
-                            <div class="summary-icon">
-                                <i class="fas fa-percentage"></i>
-                            </div>
-                            <div class="summary-content">
-                                <span class="label">المعدل</span>
-                                <span id="percentage" class="value"></span>
-                            </div>
-                        </div>
+                
+                <div class="reservations-list" id="reservationsList">
+                    <!-- الحجوزات ستضاف هنا ديناميكياً -->
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>لا توجد حجوزات حالياً</h3>
+                        <p>قم بإضافة حجز جديد باستخدام النموذج على اليسار</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Error Section -->
-            <div id="error" class="error" style="display: none;">
-                <div class="error-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <p id="errorMessage"></p>
-            </div>
-
-            <!-- Footer -->
-            <div class="footer">
-                <p>جميع الحقوق محفوظة © 2025 وزارة التربية العراقية</p>
-                <div class="designer-info">
-                    <div class="designer-badge">
-                        <i class="fas fa-palette"></i>
-                        <div class="designer-content">
-                            <p><strong>تصميم: احمد سلام الذهب</strong></p>
-                            <p>معرف التليجرام: <a href="https://t.me/xg0ldx" target="_blank">t.m/xg0ldx</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Theme Switcher -->
-            <div class="theme-switcher">
-                <div class="theme-header">
-                    <i class="fas fa-palette"></i>
-                    <span>اختر الثيم</span>
-                </div>
-                <div class="theme-buttons">
-                    <button class="theme-btn active" data-theme="default" title="الثيم الافتراضي">
-                        <span class="theme-color green"></span>
-                    </button>
-                    <button class="theme-btn" data-theme="blue" title="الثيم الأزرق">
-                        <span class="theme-color blue"></span>
-                    </button>
-                    <button class="theme-btn" data-theme="purple" title="الثيم البنفسجي">
-                        <span class="theme-color purple"></span>
-                    </button>
-                    <button class="theme-btn" data-theme="orange" title="الثيم البرتقالي">
-                        <span class="theme-color orange"></span>
-                    </button>
-                    <button class="theme-btn" data-theme="red" title="الثيم الأحمر">
-                        <span class="theme-color red"></span>
-                    </button>
-                </div>
-            </div>
+            </section>
         </div>
+        
+        <footer>
+            <p>جميع الحقوق محفوظة &copy; <span id="currentYear"></span> - نظام الأسماء المحجوزة</p>
+            <p>تم التطوير بواسطة فريق النظام</p>
+        </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // بيانات الحجوزات المخزنة محلياً
+        let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
+        let editMode = false;
+        let editId = null;
+        
+        // تحديث السنة الحالية في التذييل
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // تهيئة النظام
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderReservations();
+            
+            // إضافة بعض الحجوزات الافتراضية للعرض
+            if (reservations.length === 0) {
+                addSampleReservations();
+            }
+        });
+        
+        // إضافة حجوزات افتراضية للعرض
+        function addSampleReservations() {
+            const sampleReservations = [
+                {id: 1, ribbonName: "ربون الملكية", peopleCount: 5, comboOption: "رقم 1 - الحساب الأساسي"},
+                {id: 2, ribbonName: "ربون الإدارة", peopleCount: 3, comboOption: "رقم 3 - حساب المشتريات"},
+                {id: 3, ribbonName: "ربون المبيعات", peopleCount: 8, comboOption: "رقم 2 - حساب المبيعات"}
+            ];
+            
+            reservations.push(...sampleReservations);
+            saveToLocalStorage();
+            renderReservations();
+            updateStats();
+        }
+        
+        // معالجة إرسال النموذج
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ribbonName = document.getElementById('ribbonName').value.trim();
+            const peopleCount = parseInt(document.getElementById('peopleCount').value);
+            const comboOption = document.getElementById('comboBox').value;
+            
+            if (!ribbonName || !comboOption) {
+                showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            
+            if (editMode) {
+                // تحديث الحجر الموجود
+                updateReservation(editId, ribbonName, peopleCount, comboOption);
+                editMode = false;
+                editId = null;
+                document.querySelector('.btn').innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الحجز';
+                document.querySelector('.btn').classList.add('pulse');
+            } else {
+                // إضافة حجز جديد
+                addReservation(ribbonName, peopleCount, comboOption);
+            }
+            
+            // إعادة تعيين النموذج
+            this.reset();
+        });
+        
+        // إضافة حجز جديد
+        function addReservation(ribbonName, peopleCount, comboOption) {
+            const newReservation = {
+                id: Date.now(),
+                ribbonName,
+                peopleCount,
+                comboOption,
+                date: new Date().toLocaleDateString('ar-SA')
+            };
+            
+            reservations.push(newReservation);
+            saveToLocalStorage();
+            renderReservations();
+            updateStats();
+            showAlert('تم إضافة الحجز بنجاح', 'success');
+        }
+        
+        // تحديث حجر موجود
+        function updateReservation(id, ribbonName, peopleCount, comboOption) {
+            const index = reservations.findIndex(res => res.id === id);
+            
+            if (index !== -1) {
+                reservations[index].ribbonName = ribbonName;
+                reservations[index].peopleCount = peopleCount;
+                reservations[index].comboOption = comboOption;
+                
+                saveToLocalStorage();
+                renderReservations();
+                updateStats();
+                showAlert('تم تحديث الحجز بنجاح', 'success');
+            }
+        }
+        
+        // حذف حجر
+        function deleteReservation(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الحجز؟')) {
+                reservations = reservations.filter(res => res.id !== id);
+                saveToLocalStorage();
+                renderReservations();
+                updateStats();
+                showAlert('تم حذف الحجز بنجاح', 'success');
+            }
+        }
+        
+        // تحميل بيانات الحجر للتعديل
+        function loadReservationForEdit(id) {
+            const reservation = reservations.find(res => res.id === id);
+            
+            if (reservation) {
+                document.getElementById('ribbonName').value = reservation.ribbonName;
+                document.getElementById('peopleCount').value = reservation.peopleCount;
+                document.getElementById('comboBox').value = reservation.comboOption;
+                
+                editMode = true;
+                editId = id;
+                
+                const submitBtn = document.querySelector('.btn');
+                submitBtn.innerHTML = '<i class="fas fa-edit"></i> تحديث الحجز';
+                submitBtn.classList.remove('pulse');
+                
+                // تمرير المؤشر إلى بداية الصفحة
+                document.querySelector('.reservation-card').scrollIntoView({ behavior: 'smooth' });
+                
+                showAlert('يمكنك الآن تعديل بيانات الحجز', 'success');
+            }
+        }
+        
+        // عرض الحجوزات
+        function renderReservations() {
+            const reservationsList = document.getElementById('reservationsList');
+            
+            if (reservations.length === 0) {
+                reservationsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>لا توجد حجوزات حالياً</h3>
+                        <p>قم بإضافة حجز جديد باستخدام النموذج على اليسار</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            reservationsList.innerHTML = '';
+            
+            reservations.forEach(reservation => {
+                const reservationElement = document.createElement('div');
+                reservationElement.className = 'reservation-item';
+                
+                reservationElement.innerHTML = `
+                    <div class="reservation-info">
+                        <h3>${reservation.ribbonName}</h3>
+                        <div class="reservation-details">
+                            <span><i class="fas fa-users"></i> ${reservation.peopleCount} أفراد</span>
+                            <span><i class="fas fa-hashtag"></i> ${reservation.comboOption}</span>
+                            <span><i class="fas fa-calendar"></i> ${reservation.date}</span>
+                        </div>
+                    </div>
+                    <div class="reservation-actions">
+                        <button class="action-btn edit-btn" onclick="loadReservationForEdit(${reservation.id})">
+                            <i class="fas fa-edit"></i> تعديل
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteReservation(${reservation.id})">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                `;
+                
+                reservationsList.appendChild(reservationElement);
+            });
+        }
+        
+        // تحديث الإحصائيات
+        function updateStats() {
+            const totalReservations = reservations.length;
+            const totalPeople = reservations.reduce((sum, res) => sum + res.peopleCount, 0);
+            
+            document.getElementById('totalReservations').textContent = `الإجمالي: ${totalReservations}`;
+            document.getElementById('totalPeople').textContent = `الأفراد: ${totalPeople}`;
+        }
+        
+        // حفظ البيانات في التخزين المحلي
+        function saveToLocalStorage() {
+            localStorage.setItem('reservations', JSON.stringify(reservations));
+        }
+        
+        // عرض رسائل التنبيه
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'flex';
+            
+            // إضافة زر الإغلاق
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-alert';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            closeBtn.onclick = function() {
+                alertDiv.style.display = 'none';
+            };
+            
+            alertDiv.appendChild(closeBtn);
+            
+            // إخفاء الرسالة تلقائياً بعد 5 ثوانٍ
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // إضافة تأثيرات عند تحميل الصفحة
+        setTimeout(() => {
+            document.querySelector('header').style.animation = 'fadeIn 1s';
+            document.querySelector('.reservation-card').style.animation = 'fadeIn 1s 0.2s both';
+            document.querySelector('.reservations-container').style.animation = 'fadeIn 1s 0.4s both';
+        }, 100);
+    </script>
 </body>
 </html>
-
